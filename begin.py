@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from codecs import open
 import json
 import csv
+import xlwt
 from configparser import ConfigParser
 import os
 import sys
@@ -11,6 +12,9 @@ from email import encoders
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
+from multiprocessing import Pool
+import pdb
+
 
 
 # Find config path
@@ -65,7 +69,6 @@ def get_pages(soup):
 	return pages
 
 
-
 #get info on each page
 def pars(site_url, pages):
 	for page in range(pages):
@@ -97,24 +100,53 @@ def filter():
 def create_json():
 	with open('data.json', 'w', 'utf-8') as file:
 		json.dump(filter_result, file, ensure_ascii=False)
-	print('Создан файл data.json! ')
+	
+
+
+def create_xls():
+
+	font0 = xlwt.Font()
+	font0.name = 'Times New Roman'
+	font0.colour_index = 0
+	font0.bold = True
+
+	style0 = xlwt.XFStyle()
+	style0.font = font0
+
+	wb = xlwt.Workbook()
+	ws = wb.add_sheet('Avito', cell_overwrite_ok=True)
+	# pdb.set_trace()
+	ws.col(0).width = 13689
+
+	ws.write(0, 0, 'Title', style0)
+	ws.write(0, 1, 'Prise', style0)
+
+	
+
+	for i, data in enumerate(filter_result):
+		
+		ws.write( i+1, 0, data.get('title') )
+		ws.write( i+1, 1, int(data.get('prise')) )
+		
+
+	wb.save('data.xls')
 
 
 
-def create_csv():
-	with open('data.csv', 'w',encoding='cp1251') as file:
-		csvwriter = csv.writer(file, delimiter=',')
-		count = 0
+# def create_csv():
+# 	with open('data.csv', 'w',encoding='cp1251') as file:
+# 		csvwriter = csv.writer(file, delimiter=';')
+# 		count = 0
 
-		for i in filter_result:
+# 		for i in filter_result:
 
-			if count == 0:
-					header = i.keys()
-					csvwriter.writerow(header)
-					count += 1
+# 			if count == 0:
+# 					header = i.keys()
+# 					csvwriter.writerow(header)
+# 					count += 1
 
-			csvwriter.writerow(i.values())
-	print('Cоздан файл data.csv!')			
+# 			csvwriter.writerow(i.values())
+# 	print('Cоздан файл data.csv!')			
 
 def send_email():
 	server = smtplib.SMTP('smtp.gmail.com', 587)
@@ -165,17 +197,38 @@ def send_email():
 		server.quit()
 
 
+
+# def do_all(pages):
+# 	pars(site_url, pages)
+
+
+# with Pool(20) as p:
+# 	p.map(do_all, get_pages(soup(site_url))
+# )
+
+
 def main():
 
+
 	pars(site_url, get_pages(soup(site_url)))
+
 	filter()
 
 	if cfg.get('do', 'json') == '1':
-		create_json()
+		try:
+			create_json()
+			print('Создан файл data.json! ')
+		except:
+			print('Не удалось создать файл data.json! ')
 	
 	if cfg.get('do', 'csv') == '1':
 		create_csv()
+	if cfg.get('do', 'xls') == '1':
+		create_xls()
+
 	if cfg.get('do', 'email') == '1':
 		send_email()
+
+
 
 main()
