@@ -4,58 +4,30 @@ from codecs import open
 import json
 import csv
 import xlwt
-from configparser import ConfigParser
-import os
-import sys
+import os # 
+import sys # 
 import smtplib
 from email import encoders
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
-from multiprocessing import Pool
+from multiprocessing import Pool #
 import pdb
 
 
-
-# Find config path
-base_path = os.path.dirname(os.path.abspath(__file__))
-config_path = os.path.join(base_path, "config.ini")
-
-# Check correct path
-if os.path.exists(config_path):
-    cfg = ConfigParser()
-    cfg.read(config_path)
-else:
-    print("Config( %s ) not found! Exiting!" % config_path)
-    sys.exit(1)
-
-
-site_url = 'https://www.avito.ru/ekaterinburg/vakansii/bez_opyta_studenty'
-result = []
-filter_result = []
-FROM = cfg.get('email', 'FROM')
-TO = cfg.get('messege', 'TO')
-PASSWORD = cfg.get('email', 'PASSWORD')
-SUBJECT = cfg.get('messege', 'SUBJECT')
-headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 5.1; rv:47.0) Gecko/20100101 Firefox/47.0',
-'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'}
-more = cfg.get('filter', 'more')
-less = cfg.get('filter', 'less')
-
-if not less:
-	less = 100000000000000
-
-if not more:
-	more = 0
+from read_config import *
+from get_proxy import proxy
 
 
 def soup(url):
 	session = requests.Session()
-	request = session.get(url, headers=headers)
+	request = session.get(url, headers=headers, proxies={'http' : proxy}, timeout=10)
 
 	if request.status_code == 200:
 
 		soup = BeautifulSoup(request.content, 'lxml')
+
+		print(proxy)
 
 		if soup != None:
 			print(f'Успешное соединение с {url}')
@@ -77,7 +49,7 @@ def get_pages(soup):
 	return pages
 
 
-#get info on each page
+# get info on each page
 def pars(site_url, pages):
 	for page in range(pages):
 		site_url = f'{site_url}?p={page+1}'
@@ -217,8 +189,8 @@ def send_email():
 
 def main():
 
-
-	pars(site_url, get_pages(soup(site_url)))
+	pages_count = get_pages(soup(site_url))
+	pars(site_url, pages_count)
 
 	filter()
 
