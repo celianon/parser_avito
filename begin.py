@@ -39,6 +39,14 @@ PASSWORD = cfg.get('email', 'PASSWORD')
 SUBJECT = cfg.get('messege', 'SUBJECT')
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 5.1; rv:47.0) Gecko/20100101 Firefox/47.0',
 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'}
+more = cfg.get('filter', 'more')
+less = cfg.get('filter', 'less')
+
+if not less:
+	less = 100000000000000
+
+if not more:
+	more = 0
 
 
 def soup(url):
@@ -92,7 +100,7 @@ def pars(site_url, pages):
 
 def filter():
 	for i in result:
-		if int(i.get('prise')) > 20000:
+		if int(less) > int(i.get('prise')) > int(more):
 			filter_result.append(i)
 	print(f'Данные успешно профильтрованы. Осталось {len(filter_result)} ')
 
@@ -133,20 +141,20 @@ def create_xls():
 
 
 
-# def create_csv():
-# 	with open('data.csv', 'w',encoding='cp1251') as file:
-# 		csvwriter = csv.writer(file, delimiter=';')
-# 		count = 0
+def create_csv():
+	with open('data.csv', 'w',encoding='cp1251') as file:
+		csvwriter = csv.writer(file, delimiter=';')
+		count = 0
 
-# 		for i in filter_result:
+		for i in filter_result:
 
-# 			if count == 0:
-# 					header = i.keys()
-# 					csvwriter.writerow(header)
-# 					count += 1
+			if count == 0:
+					header = i.keys()
+					csvwriter.writerow(header)
+					count += 1
 
-# 			csvwriter.writerow(i.values())
-# 	print('Cоздан файл data.csv!')			
+			csvwriter.writerow(i.values())
+	print('Cоздан файл data.csv!')			
 
 def send_email():
 	server = smtplib.SMTP('smtp.gmail.com', 587)
@@ -159,7 +167,7 @@ def send_email():
 	msg["From"] = FROM
 	msg["To"] = TO
 
-	filename = 'data.csv'
+	filename = 'data.xls'
 
 	with open(filename, 'rb') as file:
 		part2 = MIMEBase("application", "octet-stream")
@@ -222,9 +230,19 @@ def main():
 			print('Не удалось создать файл data.json! ')
 	
 	if cfg.get('do', 'csv') == '1':
-		create_csv()
+		try:
+			create_csv()
+			print('Создан файл data.csv! ')
+		except:
+			print('Не удалось создать файл data.csv! ')
+		
+
 	if cfg.get('do', 'xls') == '1':
-		create_xls()
+		try:
+			create_xls()
+			print('Создан файл data.xls! ')
+		except:
+			print('Не удалось создать файл data.xls! ')
 
 	if cfg.get('do', 'email') == '1':
 		send_email()
