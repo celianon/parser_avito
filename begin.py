@@ -14,24 +14,27 @@ from email.mime.base import MIMEBase
 from multiprocessing import Pool #
 import pdb
 
-
 from read_config import *
 from get_proxy import proxy
 
 
 def soup(url):
-	session = requests.Session()
-	request = session.get(url, headers=headers, proxies={'http' : proxy}, timeout=10)
+	request = requests.get(url, headers=headers, proxies={'http' : f'http://{proxy}'}, timeout=3)
 
 	if request.status_code == 200:
 
 		soup = BeautifulSoup(request.content, 'lxml')
 
-		print(proxy)
+		print(f'Соединение через прокси : {proxy} ')
 
 		if soup != None:
-			print(f'Успешное соединение с {url}')
-		return soup
+			print(f'Успешное соединение с {url}\n')
+			if soup.find(text='Доступ с Вашего IP временно ограничен'):
+				# print(soup.prittify())
+				print('IP заблокирован! ')
+				sys.exit()
+			else:
+				return soup
 	else:
 		print(f'Ошибка подключения.\n Код состояния: {request.status_code}')
 		exit()
@@ -39,19 +42,19 @@ def soup(url):
 
 # get count of pages
 def get_pages(soup):
-	last_page_list = soup.findAll('a', class_='pagination-page')
-	for item in last_page_list:
-		if item.string == 'Последняя':
-			last_page = item
-			pages = int(last_page.get('href')[-1])
-			break
+	
+	last_page_list = soup.find('div', class_='pagination-pages')
+	pages = last_page_list.findAll('a', class_='pagination-page')[-1].get('href').split('p=')[1]
+	# pdb.set_trace()
+	
 	print(f'Количество страниц: {pages}')
-	return pages
+	return int(pages)
 
 
 # get info on each page
 def pars(site_url, pages):
 	for page in range(pages):
+		print(f'Парсится страница №{page+1}')
 		site_url = f'{site_url}?p={page+1}'
 		page_response = requests.get(site_url)
 		page_content = page_response.content
@@ -66,7 +69,7 @@ def pars(site_url, pages):
 			result.append({'title': title,'prise': prise})
 
 	if result != None:
-		print(f'Успешно спаршено {len(result)} данных')
+		print(f'\nУспешно спаршено {len(result)} данных')
 
 
 
@@ -74,7 +77,7 @@ def filter():
 	for i in result:
 		if int(less) > int(i.get('prise')) > int(more):
 			filter_result.append(i)
-	print(f'Данные успешно профильтрованы. Осталось {len(filter_result)} ')
+	print(f'Данные успешно профильтрованы. Осталось {len(filter_result)} \n')
 
 
 def create_json():
