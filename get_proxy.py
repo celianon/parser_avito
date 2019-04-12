@@ -12,24 +12,23 @@ with open(path) as p:
 
 
 def check_proxy(proxy_list):
-	global proxy
-	proxy = choice(proxy_list)
+	for i in range(len(proxy_list)):
+		global proxy
+		proxy = choice(proxy_list)
+		proxy = {'https' : f'https://{proxy}'}
+		try:
+			r = requests.get('https://avito.ru', verify=True, headers=headers , proxies=proxy, timeout=5)
+			if r.status_code == 200:
+				print(f'Использованная прокси : {proxy.get("https")}')
+				return proxy
 
-	try:
-		r = requests.get('http://sitespy.ru/my-ip',headers=headers , proxies={'http' : f'http://{proxy}'}, timeout=3)
-		if r.status_code == 200:
-			print(f'Использованная прокси : {proxy}')
-			
-
-	except:
-		print(f'Не удалось подключиться с {proxy}')
-		proxy_list.remove(proxy)
-
-		if proxy_list == []:
-			print('Прокси закончились ')
-			sys.exit(0)
-		check_proxy(proxy_list)
-	finally:
-		return proxy
+		except :
+			print(f'Не удалось подключиться с {proxy.get("https")}')
+			proxy_list.remove(str(proxy.get("https")[8:]))
+			if proxy_list == []:
+				print('Прокси закончились ')
+				sys.exit(0)
+			continue
+		
 
 proxy = check_proxy(proxy_list)

@@ -19,13 +19,13 @@ from get_proxy import proxy
 
 
 def soup(url):
-	request = requests.get(url, headers=headers, proxies={'http' : f'http://{proxy}'}, timeout=3)
+	request = requests.get(url, headers=headers, proxies=proxy, timeout=3)
 
 	if request.status_code == 200:
 
 		soup = BeautifulSoup(request.content, 'lxml')
 
-		print(f'Соединение через прокси : {proxy} ')
+		print(f'Соединение через прокси : {proxy.get("https")} ')
 
 		if soup != None:
 			print(f'Успешное соединение с {url}\n')
@@ -55,8 +55,8 @@ def get_pages(soup):
 def pars(site_url, pages):
 	for page in range(pages):
 		print(f'Парсится страница №{page+1}')
-		site_url = f'{site_url}?p={page+1}'
-		page_response = requests.get(site_url)
+		new_site_url = f'{site_url}?p={page+1}'
+		page_response = requests.get(new_site_url)
 		page_content = page_response.content
 
 		soup = BeautifulSoup(page_content, 'lxml')
