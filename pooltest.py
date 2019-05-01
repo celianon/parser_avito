@@ -9,6 +9,7 @@ import os
 from xlutils.copy import copy
 
 
+# headers from free site - https://developers.whatismybrowser.com/useragents/explore/
 headers = [{'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 '
                           '(KHTML, like Gecko) Chrome/21.0.1180.83 Safari/537.1',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'},
@@ -16,6 +17,10 @@ headers = [{'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1
                           '(KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.9'}
            ]
+
+# proxy from free site - https://hidemyna.me/ru/proxy-list/
+# change it to new proxy
+
 proxy = [{
         'https': 'https://84.201.254.47:3128'
     },
@@ -196,30 +201,29 @@ def check_status(desc):
 
 
 if __name__ == '__main__':
-    # url = 'https://www.avito.ru/ekaterinburg/kvartiry?p=1&q=1%20%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%BD%D0%B0%D1%8F'
-    #
-    # clean('links.txt')
-    #
-    # print('Получение количества страниц...')
-    #
-    # page = get_pages(get_soup(get_html(url)))
-    #
-    # print(f'Страниц всего {page}')
-    #
-    # list_ = get_pages_urls(url, page)
-    #
-    # print('Получение ссылок на товар...')
-    #
-    # with Pool(30) as p:
-    #     p.map(get_link, list_)
-    #
-    # print('Сбор данных...')
-    #
-    # with open('links.txt', 'r') as f:
-    #     list_link = f.read().split('\n')
-    #
-    # print(f'Всего {len(list_link)}')
-    #
-    # with Pool(40) as p:
-    #     p.map(pars_url, list_link)
-    pars_url('avito.ru/ekaterinburg/kvartiry/1-k_kvartira_53_m_725_et._1027214735')
+    url = 'https://www.avito.ru/ekaterinburg/kvartiry?p=1&q=1%20%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%BD%D0%B0%D1%8F'
+
+    clean('links.txt')
+
+    print('Получение количества страниц...')
+
+    page = get_pages(get_soup(get_html(url)))
+
+    print(f'Страниц всего {page}')
+
+    list_ = get_pages_urls(url, page)
+
+    print('Получение ссылок на товар...')
+
+    with Pool(30) as p:
+        p.map(get_link, list_)
+
+    print('Сбор данных...')
+
+    with open('links.txt', 'r') as f:
+        list_link = f.read().split('\n')
+
+    print(f'Всего {len(list_link)}')
+
+    with Pool(40) as p:
+        p.map(pars_url, list_link)
