@@ -28,7 +28,7 @@ headers = {'User-Agent': 'Mozilla/6.0 (Windows NT 5.1; rv:47.0) Gecko/20100101 F
 more = cfg.get('filter', 'more')
 less = cfg.get('filter', 'less')
 proxy = cfg.get('path', 'proxy')
-
+api_key = cfg.get('api', 'key')
 
 if not less:
 	less = 100000000000000

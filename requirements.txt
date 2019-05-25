@@ -4,6 +4,7 @@ chardet==3.0.4
 coreapi==2.3.3
 coreschema==0.0.4
 csv23==0.1.4
+fake-useragent==0.1.11
 gocept.cvs==0.1.10
 idna==2.8
 itypes==1.1.0
